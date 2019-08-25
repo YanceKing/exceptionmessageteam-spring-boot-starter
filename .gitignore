@@ -31,3 +31,6 @@ build/
 .vscode/
 !pom.xml
 !.gitignore
+!mvnw
+!mvnw.cmd
+.mvn
