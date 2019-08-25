@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.yance.config.ExceptionNoticeConfig,\
+com.yance.config.ExceptionNoticeEmailConfig,\
+com.yance.config.ExceptionNoticeRedisConfiguration,\
+com.yance.config.ExceptionNoticeWebListenConfig
