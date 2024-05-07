@@ -5,6 +5,13 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * 异常通知HTTP Client
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class HttpExceptionNotice extends ExceptionNotice {
 
 	public HttpExceptionNotice(RuntimeException exception, String filter, String url, Map<String, String> param,

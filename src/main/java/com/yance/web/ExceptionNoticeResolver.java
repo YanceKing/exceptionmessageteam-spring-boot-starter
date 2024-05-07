@@ -16,6 +16,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 异常通知解析器
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class ExceptionNoticeResolver implements HandlerExceptionResolver {
 
 	private ExceptionHandler exceptionHandler;

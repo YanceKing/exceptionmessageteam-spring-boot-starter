@@ -15,6 +15,13 @@ import org.springframework.mail.MailSender;
 import javax.annotation.PostConstruct;
 import java.util.Map;
 
+/**
+ * 异常通知邮件配置
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 @Configuration
 @AutoConfigureAfter({ MailSenderAutoConfiguration.class, ExceptionNoticeConfig.class })
 @ConditionalOnBean({ MailSender.class, MailProperties.class })

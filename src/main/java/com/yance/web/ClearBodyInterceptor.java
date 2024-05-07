@@ -7,6 +7,13 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * 清除请求体数据
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class ClearBodyInterceptor implements HandlerInterceptor {
 
 	private CurrentRequetBodyResolver currentRequetBodyResolver;

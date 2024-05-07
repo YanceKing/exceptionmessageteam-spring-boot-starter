@@ -14,6 +14,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+/**
+ * 异常通知Redis配置
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 @Configuration
 @ConditionalOnClass({ StringRedisTemplate.class })
 @ConditionalOnProperty(name = "exceptionnotice.enable-redis-storage", havingValue = "true")

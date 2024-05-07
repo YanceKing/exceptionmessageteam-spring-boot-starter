@@ -26,6 +26,13 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * 异常通知 SimpleHttpClient
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class SimpleHttpClient {
 
 	private Gson gson;

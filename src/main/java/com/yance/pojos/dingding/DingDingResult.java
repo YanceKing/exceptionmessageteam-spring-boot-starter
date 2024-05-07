@@ -1,29 +1,43 @@
 package com.yance.pojos.dingding;
 
+/**
+ * 异常通知 钉钉结果
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class DingDingResult {
 
-	private int errcode;
-	private String errmsg;
+    /**
+     * 错误编码
+     */
+    private int errcode;
 
-	public int getErrcode() {
-		return errcode;
-	}
+    /**
+     * 错误描述
+     */
+    private String errmsg;
 
-	public void setErrcode(int errcode) {
-		this.errcode = errcode;
-	}
+    public int getErrcode() {
+        return errcode;
+    }
 
-	public String getErrmsg() {
-		return errmsg;
-	}
+    public void setErrcode(int errcode) {
+        this.errcode = errcode;
+    }
 
-	public void setErrmsg(String errmsg) {
-		this.errmsg = errmsg;
-	}
+    public String getErrmsg() {
+        return errmsg;
+    }
 
-	@Override
-	public String toString() {
-		return "DingDingResult [errcode=" + errcode + ", errmsg=" + errmsg + "]";
-	}
+    public void setErrmsg(String errmsg) {
+        this.errmsg = errmsg;
+    }
+
+    @Override
+    public String toString() {
+        return "DingDingResult [errcode=" + errcode + ", errmsg=" + errmsg + "]";
+    }
 
 }

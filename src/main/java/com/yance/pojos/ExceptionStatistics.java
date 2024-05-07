@@ -3,6 +3,13 @@ package com.yance.pojos;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * 异常通统计
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class ExceptionStatistics {
 
 	/**

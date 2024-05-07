@@ -1,5 +1,12 @@
 package com.yance.properties;
 
+/**
+ * 异常通知 邮箱Property
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class EmailExceptionNoticeProperty {
 
 	/**

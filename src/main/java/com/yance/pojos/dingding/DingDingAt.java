@@ -1,5 +1,12 @@
 package com.yance.pojos.dingding;
 
+/**
+ * 异常通知钉钉 @ 所有人 @ 个人 等
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class DingDingAt {
 
 	private String[] atMobiles;

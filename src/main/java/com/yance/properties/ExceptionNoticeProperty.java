@@ -9,6 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 异常通知 配置
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 @ConfigurationProperties(prefix = "exceptionnotice")
 public class ExceptionNoticeProperty {
 

@@ -21,55 +21,62 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 异常通知配置
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 @Configuration
-@EnableConfigurationProperties({ ExceptionNoticeProperty.class, ExceptionNoticeFrequencyStrategy.class })
-@ConditionalOnMissingBean({ ExceptionHandler.class })
+@EnableConfigurationProperties({ExceptionNoticeProperty.class, ExceptionNoticeFrequencyStrategy.class})
+@ConditionalOnMissingBean({ExceptionHandler.class})
 @ConditionalOnProperty(name = "exceptionnotice.open-notice", havingValue = "true", matchIfMissing = true)
 @EnableScheduling
 public class ExceptionNoticeConfig {
 
-	@Autowired
-	private ExceptionNoticeProperty exceptionNoticeProperty;
+    @Autowired
+    private ExceptionNoticeProperty exceptionNoticeProperty;
 
-	@Autowired
-	private ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy;
+    @Autowired
+    private ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy;
 
-	@Autowired(required = false)
-	private INoticeSendComponent noticeSendComponent;
+    @Autowired(required = false)
+    private INoticeSendComponent noticeSendComponent;
 
-	@Autowired
-	private Gson gson;
+    @Autowired
+    private Gson gson;
 
-	@Bean
-	@ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "common", matchIfMissing = true)
-	@ConditionalOnMissingBean(ExceptionNoticeAop.class)
-	public ExceptionNoticeAop exceptionNoticeAop(ExceptionHandler exceptionHandler) {
-		ExceptionNoticeAop aop = new ExceptionNoticeAop(exceptionHandler);
-		return aop;
-	}
+    @Bean
+    @ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "common", matchIfMissing = true)
+    @ConditionalOnMissingBean(ExceptionNoticeAop.class)
+    public ExceptionNoticeAop exceptionNoticeAop(ExceptionHandler exceptionHandler) {
+        ExceptionNoticeAop aop = new ExceptionNoticeAop(exceptionHandler);
+        return aop;
+    }
 
-	@Bean
-	@ConditionalOnMissingBean({ ExceptionHandler.class })
-	public ExceptionHandler exceptionHandler() {
-		Map<String, DingDingExceptionNoticeProperty> dingding = exceptionNoticeProperty.getDingding();
-		List<INoticeSendComponent> list = new LinkedList<INoticeSendComponent>();
-		if (noticeSendComponent != null)
-			list.add(noticeSendComponent);
-		if (dingding != null && dingding.size() > 0) {
-			DingDingNoticeSendComponent component = new DingDingNoticeSendComponent(simpleHttpClient(),
-					exceptionNoticeProperty, dingding);
-			list.add(component);
-		}
+    @Bean
+    @ConditionalOnMissingBean({ExceptionHandler.class})
+    public ExceptionHandler exceptionHandler() {
+        Map<String, DingDingExceptionNoticeProperty> dingding = exceptionNoticeProperty.getDingding();
+        List<INoticeSendComponent> list = new LinkedList<INoticeSendComponent>();
+        if (noticeSendComponent != null)
+            list.add(noticeSendComponent);
+        if (dingding != null && dingding.size() > 0) {
+            DingDingNoticeSendComponent component = new DingDingNoticeSendComponent(simpleHttpClient(),
+                    exceptionNoticeProperty, dingding);
+            list.add(component);
+        }
 
-		ExceptionHandler exceptionHandler = new ExceptionHandler(exceptionNoticeProperty, list,
-				exceptionNoticeFrequencyStrategy);
-		return exceptionHandler;
-	}
+        ExceptionHandler exceptionHandler = new ExceptionHandler(exceptionNoticeProperty, list,
+                exceptionNoticeFrequencyStrategy);
+        return exceptionHandler;
+    }
 
-	@Bean
-	public SimpleHttpClient simpleHttpClient() {
-		SimpleHttpClient httpClient = new SimpleHttpClient(gson);
-		return httpClient;
-	}
+    @Bean
+    public SimpleHttpClient simpleHttpClient() {
+        SimpleHttpClient httpClient = new SimpleHttpClient(gson);
+        return httpClient;
+    }
 
 }

@@ -9,6 +9,13 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.Map;
 
+/**
+ * 异常通知 Redis存储组件
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class ExceptionRedisStorageComponent {
 
 	private ExceptionNoticeProperty exceptionNoticeProperty;

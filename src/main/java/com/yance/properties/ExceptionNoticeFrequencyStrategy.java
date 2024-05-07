@@ -5,6 +5,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
 
+/**
+ * 异常通知 策略
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 @ConfigurationProperties(prefix = "exceptionnotice.strategy")
 public class ExceptionNoticeFrequencyStrategy {
 

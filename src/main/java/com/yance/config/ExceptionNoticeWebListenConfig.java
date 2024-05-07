@@ -20,6 +20,13 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * 异常通知监听Web配置
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 @Configuration
 @ConditionalOnClass({ WebMvcConfigurer.class, RequestBodyAdvice.class, RequestMappingHandlerAdapter.class })
 @ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "web-mvc")

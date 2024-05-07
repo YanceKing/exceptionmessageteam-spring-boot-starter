@@ -2,6 +2,13 @@ package com.yance.properties;
 
 import java.util.Arrays;
 
+/**
+ * 异常通知 钉钉Property
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class DingDingExceptionNoticeProperty {
 
 	/**

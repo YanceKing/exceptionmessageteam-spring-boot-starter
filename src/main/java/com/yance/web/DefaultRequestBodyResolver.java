@@ -10,6 +10,13 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAd
 
 import java.lang.reflect.Type;
 
+/**
+ * 默认请求体解析器
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class DefaultRequestBodyResolver extends RequestBodyAdviceAdapter implements CurrentRequetBodyResolver {
 
 	private final ThreadLocal<String> currentRequestBodyInfo = ThreadLocal.withInitial(() -> "");

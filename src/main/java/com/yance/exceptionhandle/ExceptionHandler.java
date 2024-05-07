@@ -17,6 +17,13 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * 异常通知处理器
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class ExceptionHandler {
 
 	private ExceptionRedisStorageComponent exceptionRedisStorageComponent;

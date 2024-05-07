@@ -6,6 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 请求头解析器
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public interface CurrentRequestHeaderResolver {
 
 	default Map<String, String> headers(HttpServletRequest httpRequest, List<String> headerNames) {

@@ -1,5 +1,12 @@
 package com.yance.pojos.dingding;
 
+/**
+ * 钉钉消息 content
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class DingDingText {
 
 	private String content;

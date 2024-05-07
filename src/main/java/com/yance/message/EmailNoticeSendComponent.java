@@ -12,6 +12,13 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * 异常通知 EmailNoticeSendComponent
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class EmailNoticeSendComponent implements INoticeSendComponent {
 
 	private final Log logger = LogFactory.getLog(getClass());

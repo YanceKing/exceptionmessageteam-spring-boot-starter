@@ -12,6 +12,13 @@ import org.apache.commons.logging.LogFactory;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * 异常通知 DingDingNoticeSendComponent
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020/04/01
+ */
 public class DingDingNoticeSendComponent implements INoticeSendComponent {
 
 	private SimpleHttpClient simpleHttpClient;
