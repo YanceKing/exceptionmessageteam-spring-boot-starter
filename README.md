@@ -107,7 +107,7 @@ public class DemoApplicationTests {
 }
 ```
 当运行单元测试后，假如钉钉配置没有问题的话，你的钉钉中就会出现如下类似的消息：
-![效果](/src/main/resources/QQ图片20190606135538.png)
+![效果](/src/main/resources/desc_demo1.png)
 当然，还需要测试另一个bean的效果：
 ```
 @RunWith(SpringRunner.class)
@@ -125,7 +125,7 @@ public class DemoApplicationTests {
 }
 ```
 然后你的钉钉的另一个机器人又会出现如下消息：
-![效果](/src/main/resources/QQ图片20190606140534.png)
+![效果](/src/main/resources/desc_demo2.png)
 最后一个测试当然你可以做测试``noticeComponents.anotherMethod("赵四" , 55);``，但是可以明确的告诉你没有任何结果通知这是因为配置了
 ```
  exclude-exceptions:
@@ -145,7 +145,7 @@ public void anotherMethod(String name, int age) {
 ## 咋做的
 
 本框架遵循spring boot starter的自动化配置规范而开发的自动化异常通知框架，在原有的单人版基础上进行了多处改进并升级成团队版，整体业务流程如下：
-![流程](/src/main/resources/liucheng2.png)
+![流程](/src/main/resources/desc_process.png)
 
 
 ### 配置
@@ -161,7 +161,7 @@ public void anotherMethod(String name, int age) {
 - 全局配置主要包含在``ExceptionNoticeProperty``类下，最根本的配置便是是否开启异常通知配置``exceptionnotice.open-notice``，在开发环境，由于测试与调试都是实时反馈，有bug就即时的改掉了，并不需要进行异常通知的配置，但是在线上测试或者是生产环境还是需要进行开启的
 - 每次抛出的异常的时候，异常的追踪信息非常的长，``exceptionnotice.included-trace-package``就是为了解决这个问题而存在的，一般情况下，此配置项就是配置你工程的包路径就可以了，当你的工程中出现异常时，``exceptionnotice.included-trace-package``就会把包含此包路径的追踪信息给过滤出来，并且去掉代理产生的追踪信息，这样就一目了然的知道是哪里出错了。
 - 每一个工程都会有工程名，毕竟我需要知道是哪个工程出错了，配置工程名的就是``exceptionnotice.project-name``，假如工程名没有配置，框架就会优先去找``spring.application.name``，假如这个也没配置，那么这个工程我也不知道叫啥了，所以其名曰：无名工程
-- 框架配置里面 **最重要的配置是** ：``exceptionnotice.listen-type``表示的是此工程的监听方式，目前有两种监听方式：**普通监听（common）** ；**mvc监听（web-mvc）** 。这两种监听方式各有千秋，普通监听方式主要运用aop的方式对有注解的方法或类进行监听，可以加在任何类与方法上。但是mvc监听只能对controller层进行监听，对其它层无效，不过异常通知的信息更丰富，不仅仅包括了普通监听的所有信息（不包含参数），还包含了请求中的参数信息（param）、请求中的请求体信息（body）和请求体中的头信息（header）：![请求异常通知](/src/main/resources/QQ图片20190606151751.png)
+- 框架配置里面 **最重要的配置是** ：``exceptionnotice.listen-type``表示的是此工程的监听方式，目前有两种监听方式：**普通监听（common）** ；**mvc监听（web-mvc）** 。这两种监听方式各有千秋，普通监听方式主要运用aop的方式对有注解的方法或类进行监听，可以加在任何类与方法上。但是mvc监听只能对controller层进行监听，对其它层无效，不过异常通知的信息更丰富，不仅仅包括了普通监听的所有信息（不包含参数），还包含了请求中的参数信息（param）、请求中的请求体信息（body）和请求体中的头信息（header）：![请求异常通知](/src/main/resources/desc_demo3.png)
 - 配合``exceptionnotice.listen-type=web-mvc``，可以对请求头进行筛选，默认情况下会把所有的请求头返回
 ```
 exceptionnotice.include-header-name=headerName1,headerName2
