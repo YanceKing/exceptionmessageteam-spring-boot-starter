@@ -1,47 +1,18 @@
 package com.yance.pojos.dingding;
 
-/**
- * 异常通知 钉钉Msg
- *
- * @author yance
- * @version 1.0
- * @since 2020/04/01
- */
 public class DingDingNotice {
 
-	private DingDingText text;
-	private DingDingAt at;
-	private String msgtype = "text";
+	protected DingDingAt at;
 
-	public DingDingNotice(DingDingText text, DingDingAt at, String msgtype) {
-		super();
-		this.text = text;
+	protected String msgtype = "text";
+
+	/**
+	 * @param at
+	 * @param msgtype
+	 */
+	public DingDingNotice(DingDingAt at, String msgtype) {
 		this.at = at;
 		this.msgtype = msgtype;
-	}
-
-	public DingDingNotice(DingDingText text, DingDingAt at) {
-		this.text = text;
-		this.at = at;
-	}
-
-	public DingDingNotice(String text, String... at) {
-		this.text = new DingDingText(text);
-		this.at = new DingDingAt(at);
-	}
-
-	/**
-	 * @return the text
-	 */
-	public DingDingText getText() {
-		return text;
-	}
-
-	/**
-	 * @param text the text to set
-	 */
-	public void setText(DingDingText text) {
-		this.text = text;
 	}
 
 	/**

@@ -1,18 +1,14 @@
 package com.yance.web;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /**
- * 清除请求体数据
+ * @author 徐晓东
  *
- * @author yance
- * @version 1.0
- * @since 2020/04/01
  */
 public class ClearBodyInterceptor implements HandlerInterceptor {
 
@@ -20,10 +16,16 @@ public class ClearBodyInterceptor implements HandlerInterceptor {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * @param currentRequetBodyResolver
+	 */
 	public ClearBodyInterceptor(CurrentRequetBodyResolver currentRequetBodyResolver) {
 		this.currentRequetBodyResolver = currentRequetBodyResolver;
 	}
 
+	/**
+	 * 
+	 */
 	public ClearBodyInterceptor() {
 	}
 
@@ -44,7 +46,7 @@ public class ClearBodyInterceptor implements HandlerInterceptor {
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
-		logger.debug("清除请求体数据");
+		logger.trace("清除请求体数据");
 		currentRequetBodyResolver.remove();
 	}
 

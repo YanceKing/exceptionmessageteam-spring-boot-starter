@@ -1,114 +1,99 @@
 package com.yance.exceptionhandle;
 
-import com.yance.content.ExceptionNotice;
-import com.yance.content.HttpExceptionNotice;
-import com.yance.content.MultiTenantExceptionNotice;
-import com.yance.message.INoticeSendComponent;
-import com.yance.pojos.ExceptionStatistics;
-import com.yance.properties.ExceptionNoticeFrequencyStrategy;
-import com.yance.properties.ExceptionNoticeProperty;
-import com.yance.redis.ExceptionRedisStorageComponent;
+import com.yance.exceptionhandle.event.ExceptionNoticeEvent;
+import com.yance.exceptions.PrometheusException;
+import com.yance.pojos.ExceptionNotice;
+import com.yance.pojos.HttpExceptionNotice;
+import com.yance.properties.PrometheusProperties;
+import com.yance.properties.exception.ExceptionNoticeProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.util.StringUtils;
+import org.springframework.context.ApplicationEventPublisher;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-/**
- * 异常通知处理器
- *
- * @author yance
- * @version 1.0
- * @since 2020/04/01
- */
 public class ExceptionHandler {
 
-	private ExceptionRedisStorageComponent exceptionRedisStorageComponent;
+	private final PrometheusProperties prometheusProperties;
 
-	private ExceptionNoticeProperty exceptionNoticeProperty;
+	private final ExceptionNoticeProperties exceptionNoticeProperties;
 
-	private ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy;
-
-	private final Map<String, INoticeSendComponent> blameMap = new HashMap<>();
-
-	private final Map<String, ExceptionStatistics> checkUid = Collections.synchronizedMap(new HashMap<>());
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	public ExceptionHandler(ExceptionNoticeProperty exceptionNoticeProperty,
-			Collection<INoticeSendComponent> noticeSendComponents,
-			ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy) {
-		this.exceptionNoticeFrequencyStrategy = exceptionNoticeFrequencyStrategy;
-		noticeSendComponents.forEach(x -> x.getAllBuddies().forEach(y -> blameMap.putIfAbsent(y, x)));
-		this.exceptionNoticeProperty = exceptionNoticeProperty;
+	private final String defaultBlameFor;
+
+	public ExceptionHandler(PrometheusProperties prometheusProperties,
+			ExceptionNoticeProperties exceptionNoticeProperties, ApplicationEventPublisher applicationEventPublisher) {
+		this.prometheusProperties = prometheusProperties;
+		this.exceptionNoticeProperties = exceptionNoticeProperties;
+		this.applicationEventPublisher = applicationEventPublisher;
+		this.defaultBlameFor = prometheusProperties.getDefaultName();
 	}
 
-	/**
-	 * @param exceptionRedisStorageComponent the exceptionRedisStorageComponent to
-	 *                                       set
-	 */
-	public void setExceptionRedisStorageComponent(ExceptionRedisStorageComponent exceptionRedisStorageComponent) {
-		this.exceptionRedisStorageComponent = exceptionRedisStorageComponent;
+	private String blameFor(String blameFor) {
+		blameFor = StringUtils.isBlank(blameFor) ? defaultBlameFor : blameFor;
+		if (blameFor.isBlank())
+			throw new PrometheusException("no blame for this error!");
+		return blameFor;
 	}
 
-	public void registerNoticeSendComponent(INoticeSendComponent component) {
-		component.getAllBuddies().forEach(x -> blameMap.putIfAbsent(x, component));
-	}
-
-	/**
-	 * 最基础的异常通知的创建方法
-	 * 
-	 * @param blamedFor 谁背锅？
-	 * @param exception 异常信息
-	 * 
-	 * @return
-	 */
-	public ExceptionNotice createNotice(String blamedFor, RuntimeException exception) {
-		blamedFor = checkBlameFor(blamedFor);
+	public ExceptionNotice createNotice(String blameFor, Throwable exception) {
 		if (containsException(exception))
 			return null;
+		blameFor = blameFor(blameFor);
 		ExceptionNotice exceptionNotice = new ExceptionNotice(exception,
-				exceptionNoticeProperty.getIncludedTracePackage(), null);
-		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
-		boolean noHas = persist(exceptionNotice);
-		if (noHas)
-			messageSend(blamedFor, exceptionNotice);
+				exceptionNoticeProperties.getIncludedTracePackage(), null, prometheusProperties.getProjectEnviroment(),
+				String.format("%s的异常通知", prometheusProperties.getProjectName()));
+		exceptionNotice.setProject(prometheusProperties.getProjectName());
+		applicationEventPublisher.publishEvent(new ExceptionNoticeEvent(this, exceptionNotice, blameFor));
 		return exceptionNotice;
 
 	}
 
-	private boolean containsException(RuntimeException exception) {
-		Class<? extends RuntimeException> thisEClass = exception.getClass();
-		List<Class<? extends RuntimeException>> list = exceptionNoticeProperty.getExcludeExceptions();
-		for (Class<? extends RuntimeException> clazz : list) {
-			if (clazz.isAssignableFrom(thisEClass))
+	private boolean containsException(Throwable exception) {
+		List<Class<? extends Throwable>> thisEClass = getAllExceptionClazz(exception);
+		List<Class<? extends Exception>> list = exceptionNoticeProperties.getExcludeExceptions();
+		for (Class<? extends Exception> clazz : list) {
+			if (thisEClass.stream().anyMatch(c -> clazz.isAssignableFrom(c)))
 				return true;
 		}
 		return false;
 	}
 
+	private List<Class<? extends Throwable>> getAllExceptionClazz(Throwable exception) {
+		List<Class<? extends Throwable>> list = new LinkedList<Class<? extends Throwable>>();
+		list.add(exception.getClass());
+		Throwable cause = exception.getCause();
+		while (cause != null) {
+			list.add(cause.getClass());
+			cause = cause.getCause();
+		}
+		return list;
+	}
+
 	/**
 	 * 反射方式获取方法中出现的异常进行的通知
 	 * 
-	 * @param blamedFor 谁背锅？
-	 * @param ex        异常信息
-	 * @param method    方法名
-	 * @param args      参数信息
+	 * @param ex     异常信息
+	 * @param method 方法名
+	 * @param args   参数信息
 	 * @return
 	 */
-	public ExceptionNotice createNotice(String blamedFor, RuntimeException ex, String method, Object[] args) {
-		blamedFor = checkBlameFor(blamedFor);
+	public ExceptionNotice createNotice(String blameFor, Throwable ex, String method, Object[] args) {
 		if (containsException(ex))
 			return null;
-		ExceptionNotice exceptionNotice = new ExceptionNotice(ex, exceptionNoticeProperty.getIncludedTracePackage(),
-				args);
-		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
-		boolean noHas = persist(exceptionNotice);
-		if (noHas)
-			messageSend(blamedFor, exceptionNotice);
+		blameFor = blameFor(blameFor);
+		ExceptionNotice exceptionNotice = new ExceptionNotice(ex, exceptionNoticeProperties.getIncludedTracePackage(),
+				args, prometheusProperties.getProjectEnviroment(),
+				String.format("%s的异常通知", prometheusProperties.getProjectName()));
+		logger.debug("创建异常通知：" + method);
+		exceptionNotice.setProject(prometheusProperties.getProjectName());
+		applicationEventPublisher.publishEvent(new ExceptionNoticeEvent(this, exceptionNotice, blameFor));
 		return exceptionNotice;
 
 	}
@@ -116,7 +101,6 @@ public class ExceptionHandler {
 	/**
 	 * 创建一个http请求异常的通知
 	 * 
-	 * @param blamedFor
 	 * @param exception
 	 * @param url
 	 * @param param
@@ -124,102 +108,19 @@ public class ExceptionHandler {
 	 * @param headers
 	 * @return
 	 */
-	public HttpExceptionNotice createHttpNotice(String blamedFor, RuntimeException exception, String url,
-			Map<String, String> param, String requesBody, Map<String, String> headers) {
-		blamedFor = checkBlameFor(blamedFor);
+	public HttpExceptionNotice createHttpNotice(String blameFor, Throwable exception, String url,
+												Map<String, String> param, String requesBody, Map<String, String> headers) {
 		if (containsException(exception))
 			return null;
+		blameFor = blameFor(blameFor);
+		logger.debug("创建异常通知：" + url);
 		HttpExceptionNotice exceptionNotice = new HttpExceptionNotice(exception,
-				exceptionNoticeProperty.getIncludedTracePackage(), url, param, requesBody, headers);
-		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
-		boolean noHas = persist(exceptionNotice);
-		if (noHas)
-			messageSend(blamedFor, exceptionNotice);
+				exceptionNoticeProperties.getIncludedTracePackage(), url, param, requesBody, headers,
+				prometheusProperties.getProjectEnviroment(),
+				String.format("%s的异常通知", prometheusProperties.getProjectName()));
+		exceptionNotice.setProject(prometheusProperties.getProjectName());
+		applicationEventPublisher.publishEvent(new ExceptionNoticeEvent(this, exceptionNotice, blameFor));
 		return exceptionNotice;
 	}
 
-	/**
-	 * 多租户中处理背锅信息
-	 * 
-	 * @param blamedFor
-	 * @param exception
-	 * @param url
-	 * @param param
-	 * @param requestBody
-	 * @param headers
-	 * @param tenantId
-	 * @return
-	 */
-	public MultiTenantExceptionNotice createHttpNotice(String blamedFor, RuntimeException exception, String url,
-			Map<String, String> param, String requestBody, Map<String, String> headers, String tenantId) {
-		blamedFor = checkBlameFor(blamedFor);
-		if (containsException(exception))
-			return null;
-		MultiTenantExceptionNotice exceptionNotice = new MultiTenantExceptionNotice(exception,
-				exceptionNoticeProperty.getIncludedTracePackage(), url, param, requestBody, headers, tenantId);
-		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
-		boolean noHas = persist(exceptionNotice);
-		if (noHas)
-			messageSend(blamedFor, exceptionNotice);
-		return exceptionNotice;
-	}
-
-	private boolean persist(ExceptionNotice exceptionNotice) {
-		Boolean needNotice = false;
-		String uid = exceptionNotice.getUid();
-		ExceptionStatistics exceptionStatistics = checkUid.get(uid);
-		logger.debug(exceptionStatistics);
-		if (exceptionStatistics != null) {
-			Long count = exceptionStatistics.plusOne();
-			if (exceptionNoticeFrequencyStrategy.getEnabled()) {
-				if (stratergyCheck(exceptionStatistics, exceptionNoticeFrequencyStrategy)) {
-					LocalDateTime now = LocalDateTime.now();
-					exceptionNotice.setLatestShowTime(now);
-					exceptionNotice.setShowCount(count);
-					exceptionStatistics.setLastShowedCount(count);
-					exceptionStatistics.setNoticeTime(now);
-					needNotice = true;
-				}
-			}
-		} else {
-			exceptionStatistics = new ExceptionStatistics(uid);
-			synchronized (exceptionStatistics) {
-				checkUid.put(uid, exceptionStatistics);
-				needNotice = true;
-			}
-		}
-		if (exceptionRedisStorageComponent != null)
-			exceptionRedisStorageComponent.save(exceptionNotice);
-		return needNotice;
-	}
-
-	private String checkBlameFor(String blameFor) {
-		blameFor = StringUtils.isEmpty(blameFor) || (!blameMap.containsKey(blameFor))
-				? exceptionNoticeProperty.getDefaultNotice()
-				: blameFor;
-		return blameFor;
-	}
-
-	private boolean stratergyCheck(ExceptionStatistics exceptionStatistics,
-			ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy) {
-		switch (exceptionNoticeFrequencyStrategy.getFrequencyType()) {
-		case TIMEOUT:
-			Duration dur = Duration.between(exceptionStatistics.getNoticeTime(), LocalDateTime.now());
-			return exceptionNoticeFrequencyStrategy.getNoticeTimeInterval().compareTo(dur) < 0;
-		case SHOWCOUNT:
-			return exceptionStatistics.getShowCount().longValue() - exceptionStatistics.getLastShowedCount()
-					.longValue() > exceptionNoticeFrequencyStrategy.getNoticeShowCount().longValue();
-		}
-		return false;
-	}
-
-	private void messageSend(String blamedFor, ExceptionNotice exceptionNotice) {
-		INoticeSendComponent sendComponent = blameMap.get(blamedFor);
-		sendComponent.send(blamedFor, exceptionNotice);
-	}
-
-	@Scheduled(cron = "0 25 0 * * * ")
-	public void resetCheck() {
-		checkUid.clear();
-	}
 }
