@@ -10,30 +10,36 @@ import org.aspectj.lang.annotation.Aspect;
 
 import java.util.Arrays;
 
+/**
+ * AOP 核心处理
+ *
+ * @author yance
+ * @date 2020/08/04
+ */
 @Aspect
 public class ExceptionNoticeAop {
 
-	private ExceptionHandler exceptionHandler;
+    private ExceptionHandler exceptionHandler;
 
-	private final Log logger = LogFactory.getLog(getClass());
+    private final Log logger = LogFactory.getLog(getClass());
 
-	public ExceptionNoticeAop(ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
-	}
+    public ExceptionNoticeAop(ExceptionHandler exceptionHandler) {
+        this.exceptionHandler = exceptionHandler;
+    }
 
-	@AfterThrowing(value = "@within(listener)", throwing = "e", argNames = "listener,e")
-	public void exceptionNotice(JoinPoint joinPoint, ExceptionListener listener, RuntimeException e) {
-		handleException(listener.value(), e, joinPoint.getSignature().getName(), joinPoint.getArgs());
-	}
+    @AfterThrowing(value = "@within(listener)", throwing = "e", argNames = "listener,e")
+    public void exceptionNotice(JoinPoint joinPoint, ExceptionListener listener, RuntimeException e) {
+        handleException(listener.value(), e, joinPoint.getSignature().getName(), joinPoint.getArgs());
+    }
 
-	@AfterThrowing(value = "@annotation(listener)", throwing = "e", argNames = "listener,e")
-	public void exceptionNoticeWithMethod(JoinPoint joinPoint, ExceptionListener listener, RuntimeException e) {
-		handleException(listener.value(), e, joinPoint.getSignature().getName(), joinPoint.getArgs());
-	}
+    @AfterThrowing(value = "@annotation(listener)", throwing = "e", argNames = "listener,e")
+    public void exceptionNoticeWithMethod(JoinPoint joinPoint, ExceptionListener listener, RuntimeException e) {
+        handleException(listener.value(), e, joinPoint.getSignature().getName(), joinPoint.getArgs());
+    }
 
-	private void handleException(String blameFor, RuntimeException exception, String methodName, Object[] args) {
-		logger.debug("出现异常：" + methodName
-				+ String.join(",", Arrays.stream(args).map(x -> x.toString()).toArray(String[]::new)));
-		exceptionHandler.createNotice(blameFor, exception, methodName, args);
-	}
+    private void handleException(String blameFor, RuntimeException exception, String methodName, Object[] args) {
+        logger.debug("出现异常：" + methodName
+                + String.join(",", Arrays.stream(args).map(x -> x.toString()).toArray(String[]::new)));
+        exceptionHandler.createNotice(blameFor, exception, methodName, args);
+    }
 }
