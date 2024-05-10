@@ -15,65 +15,68 @@ import com.yance.text.NoticeTextResolverProvider;
 import org.springframework.context.ApplicationListener;
 
 /**
- * @author 徐晓东
+ * 异常发送监听
  *
+ * @author yance
+ * @date 2020/08/06
+ * @description
  */
 public abstract class AbstractNoticeSendListener implements ApplicationListener<ExceptionNoticeEvent> {
 
-	private final NoticeFrequencyStrategy noticeFrequencyStrategy;
+    private final NoticeFrequencyStrategy noticeFrequencyStrategy;
 
-	private final NoticeStatisticsRepository exceptionNoticeStatisticsRepository;
+    private final NoticeStatisticsRepository exceptionNoticeStatisticsRepository;
 
-	private final NoticeTextResolverProvider resolverProvider;
+    private final NoticeTextResolverProvider resolverProvider;
 
-	private final NoticeComponentFactory noticeComponentFactory;
+    private final NoticeComponentFactory noticeComponentFactory;
 
-	public AbstractNoticeSendListener(NoticeFrequencyStrategy noticeFrequencyStrategy,
-			NoticeStatisticsRepository exceptionNoticeStatisticsRepository, NoticeTextResolverProvider resolverProvider,
-			NoticeComponentFactory noticeComponentFactory) {
-		this.noticeFrequencyStrategy = noticeFrequencyStrategy;
-		this.exceptionNoticeStatisticsRepository = exceptionNoticeStatisticsRepository;
-		this.resolverProvider = resolverProvider;
-		this.noticeComponentFactory = noticeComponentFactory;
-	}
+    public AbstractNoticeSendListener(NoticeFrequencyStrategy noticeFrequencyStrategy,
+                                      NoticeStatisticsRepository exceptionNoticeStatisticsRepository, NoticeTextResolverProvider resolverProvider,
+                                      NoticeComponentFactory noticeComponentFactory) {
+        this.noticeFrequencyStrategy = noticeFrequencyStrategy;
+        this.exceptionNoticeStatisticsRepository = exceptionNoticeStatisticsRepository;
+        this.resolverProvider = resolverProvider;
+        this.noticeComponentFactory = noticeComponentFactory;
+    }
 
-	public void send(String who, PromethuesNotice notice) {
-		List<INoticeSendComponent> noticeSendComponents = noticeComponentFactory.get(who);
-		NoticeStatistics statistics = exceptionNoticeStatisticsRepository.increaseOne(notice);
-		if (stratergyCheck(statistics, noticeFrequencyStrategy)) {
-			notice.setShowCount(statistics.getShowCount().longValue());
-			notice.setCreateTime(LocalDateTime.now());
-			noticeSendComponents.forEach(x -> {
-				x.send(notice, resolverProvider.get(notice.getClass(), x));
-			});
-			exceptionNoticeStatisticsRepository.increaseShowOne(statistics);
-		}
-	}
+    public void send(String who, PromethuesNotice notice) {
+        List<INoticeSendComponent> noticeSendComponents = noticeComponentFactory.get(who);
+        NoticeStatistics statistics = exceptionNoticeStatisticsRepository.increaseOne(notice);
+        if (stratergyCheck(statistics, noticeFrequencyStrategy)) {
+            notice.setShowCount(statistics.getShowCount().longValue());
+            notice.setCreateTime(LocalDateTime.now());
+            noticeSendComponents.forEach(x -> {
+                x.send(notice, resolverProvider.get(notice.getClass(), x));
+            });
+            exceptionNoticeStatisticsRepository.increaseShowOne(statistics);
+        }
+    }
 
-	/**
-	 * @param exceptionStatistics
-	 * @param noticeFrequencyStrategy
-	 * @return
-	 */
-	protected boolean stratergyCheck(NoticeStatistics exceptionStatistics,
-									 NoticeFrequencyStrategy noticeFrequencyStrategy) {
-		if (exceptionStatistics.isFirstCreated()) {
-			exceptionStatistics.setFirstCreated(false);
-			return true;
-		}
-		boolean flag = false;
-		switch (noticeFrequencyStrategy.getFrequencyType()) {
-		case TIMEOUT -> {
-			Duration dur = Duration.between(exceptionStatistics.getNoticeTime(), LocalDateTime.now());
-			flag = noticeFrequencyStrategy.getNoticeTimeInterval().compareTo(dur) < 0;
-		}
-		case SHOWCOUNT -> {
-			flag = exceptionStatistics.getShowCount().longValue() - exceptionStatistics.getLastNoticedCount()
-					.longValue() > noticeFrequencyStrategy.getNoticeShowCount().longValue();
-		}
-		default -> {
-		}
-		}
-		return flag;
-	}
+    /**
+     * @param exceptionStatistics
+     * @param noticeFrequencyStrategy
+     * @return
+     */
+    protected boolean stratergyCheck(NoticeStatistics exceptionStatistics,
+                                     NoticeFrequencyStrategy noticeFrequencyStrategy) {
+        if (exceptionStatistics.isFirstCreated()) {
+            exceptionStatistics.setFirstCreated(false);
+            return true;
+        }
+        boolean flag = false;
+        switch (noticeFrequencyStrategy.getFrequencyType()) {
+            case TIMEOUT -> {
+                Duration dur = Duration.between(exceptionStatistics.getNoticeTime(), LocalDateTime.now());
+                flag = noticeFrequencyStrategy.getNoticeTimeInterval().compareTo(dur) < 0;
+            }
+            case SHOWCOUNT -> {
+                flag = exceptionStatistics.getShowCount().longValue() - exceptionStatistics.getLastNoticedCount()
+                        .longValue() > noticeFrequencyStrategy.getNoticeShowCount().longValue();
+            }
+            default -> {
+            }
+        }
+        return flag;
+    }
 }
