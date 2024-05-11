@@ -19,57 +19,65 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+/**
+ * 异常信息监听配置
+ *
+ * @author yance
+ * @version 1.0.0
+ * @date 2020/11/09
+ * @description
+ */
 @Configuration
 @ConditionalOnWebApplication
 @ConditionalOnExceptionNotice
 @ConditionalOnProperty(name = "prometheus.exceptionnotice.listen-type", havingValue = "web")
 public class ExceptionNoticeWebListenConfig implements WebMvcConfigurer, WebMvcRegistrations {
 
-	@Autowired
-	private ExceptionHandler exceptionHandler;
-	@Autowired
-	private ExceptionNoticeProperties exceptionNoticeProperties;
+    @Autowired
+    private ExceptionHandler exceptionHandler;
+    @Autowired
+    private ExceptionNoticeProperties exceptionNoticeProperties;
 
-	@Override
-	public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
-		resolvers.add(0, ExceptionNoticeHandlerResolver());
-	}
+    @Override
+    public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
+        resolvers.add(0, ExceptionNoticeHandlerResolver());
+    }
 
-//	@Bean
-	public ExceptionNoticeHandlerResolver ExceptionNoticeHandlerResolver() {
-		ExceptionNoticeHandlerResolver exceptionNoticeResolver = new ExceptionNoticeHandlerResolver(exceptionHandler,
-				currentRequetBodyResolver(), currentRequestHeaderResolver(), exceptionNoticeProperties);
-		return exceptionNoticeResolver;
-	}
+    //	@Bean
+    public ExceptionNoticeHandlerResolver ExceptionNoticeHandlerResolver() {
+        ExceptionNoticeHandlerResolver exceptionNoticeResolver = new ExceptionNoticeHandlerResolver(exceptionHandler,
+                currentRequetBodyResolver(), currentRequestHeaderResolver(), exceptionNoticeProperties);
+        return exceptionNoticeResolver;
+    }
 
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(clearBodyInterceptor());
-	}
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(clearBodyInterceptor());
+    }
 
-	@Bean
-	public ClearBodyInterceptor clearBodyInterceptor() {
-		ClearBodyInterceptor bodyInterceptor = new ClearBodyInterceptor(currentRequetBodyResolver());
-		return bodyInterceptor;
+    @Bean
+    public ClearBodyInterceptor clearBodyInterceptor() {
+        ClearBodyInterceptor bodyInterceptor = new ClearBodyInterceptor(currentRequetBodyResolver());
+        return bodyInterceptor;
 
-	}
+    }
 
-	@Bean
-	@ConditionalOnMissingBean(value = CurrentRequestHeaderResolver.class)
-	public CurrentRequestHeaderResolver currentRequestHeaderResolver() {
-		return new DefaultRequestHeaderResolver();
-	}
+    @Bean
+    @ConditionalOnMissingBean(value = CurrentRequestHeaderResolver.class)
+    public CurrentRequestHeaderResolver currentRequestHeaderResolver() {
+        return new DefaultRequestHeaderResolver();
+    }
 
-	@Bean
-	public CurrentRequetBodyResolver currentRequetBodyResolver() {
-		return new DefaultRequestBodyResolver();
-	}
+    @Bean
+    public CurrentRequetBodyResolver currentRequetBodyResolver() {
+        return new DefaultRequestBodyResolver();
+    }
 
-	@Override
-	public RequestMappingHandlerAdapter getRequestMappingHandlerAdapter() {
-		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
-		adapter.setRequestBodyAdvice(Arrays.asList(currentRequetBodyResolver()));
-		return adapter;
-	}
+    @Override
+    public RequestMappingHandlerAdapter getRequestMappingHandlerAdapter() {
+        RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
+        adapter.setRequestBodyAdvice(Arrays.asList(currentRequetBodyResolver()));
+        return adapter;
+    }
 
 }

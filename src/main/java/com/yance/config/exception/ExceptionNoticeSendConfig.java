@@ -17,37 +17,44 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 
+/**
+ * 异常通知发送配置
+ *
+ * @author yance
+ * @version 1.0
+ * @since 2020-07-08
+ */
 @Configuration
 @ConditionalOnExceptionNotice
-@EnableConfigurationProperties({ ExceptionNoticeFrequencyStrategy.class })
+@EnableConfigurationProperties({ExceptionNoticeFrequencyStrategy.class})
 public class ExceptionNoticeSendConfig {
 
-	private final Log logger = LogFactory.getLog(ExceptionNoticeSendConfig.class);
+    private final Log logger = LogFactory.getLog(ExceptionNoticeSendConfig.class);
 
-	@Bean
-	@ConditionalOnMissingBean
-	@ConditionalOnProperty(value = "prometheus.exceptionnotice.enable-async", havingValue = "false", matchIfMissing = true)
-	public AbstractNoticeSendListener exceptionNoticeSendListener(
-			ExceptionNoticeFrequencyStrategy noticeFrequencyStrategy,
-			NoticeStatisticsRepository exceptionNoticeStatisticsRepository, NoticeTextResolverProvider resolverProvider,
-			NoticeComponentFactory noticeComponentFactory) {
-		logger.debug("创建同步发送监听器");
-		AbstractNoticeSendListener listener = new ExceptionNoticeSendListener(noticeFrequencyStrategy,
-				exceptionNoticeStatisticsRepository, resolverProvider, noticeComponentFactory, "");
-		return listener;
-	}
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(value = "prometheus.exceptionnotice.enable-async", havingValue = "false", matchIfMissing = true)
+    public AbstractNoticeSendListener exceptionNoticeSendListener(
+            ExceptionNoticeFrequencyStrategy noticeFrequencyStrategy,
+            NoticeStatisticsRepository exceptionNoticeStatisticsRepository, NoticeTextResolverProvider resolverProvider,
+            NoticeComponentFactory noticeComponentFactory) {
+        logger.debug("创建同步发送监听器");
+        AbstractNoticeSendListener listener = new ExceptionNoticeSendListener(noticeFrequencyStrategy,
+                exceptionNoticeStatisticsRepository, resolverProvider, noticeComponentFactory, "");
+        return listener;
+    }
 
-	@Bean
-	@ConditionalOnMissingBean
-	@ConditionalOnProperty(value = "prometheus.exceptionnotice.enable-async", havingValue = "true")
-	public AbstractNoticeSendListener ExceptionNoticeAsyncSendListener(
-			ExceptionNoticeFrequencyStrategy noticeFrequencyStrategy,
-			NoticeStatisticsRepository exceptionNoticeStatisticsRepository, NoticeTextResolverProvider resolverProvider,
-			NoticeComponentFactory noticeComponentFactory, AsyncTaskExecutor applicationTaskExecutor) {
-		logger.debug("创建异步发送监听器");
-		AbstractNoticeSendListener listener = new ExceptionNoticeAsyncSendListener(noticeFrequencyStrategy,
-				exceptionNoticeStatisticsRepository, resolverProvider, noticeComponentFactory, null,
-				applicationTaskExecutor);
-		return listener;
-	}
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(value = "prometheus.exceptionnotice.enable-async", havingValue = "true")
+    public AbstractNoticeSendListener ExceptionNoticeAsyncSendListener(
+            ExceptionNoticeFrequencyStrategy noticeFrequencyStrategy,
+            NoticeStatisticsRepository exceptionNoticeStatisticsRepository, NoticeTextResolverProvider resolverProvider,
+            NoticeComponentFactory noticeComponentFactory, AsyncTaskExecutor applicationTaskExecutor) {
+        logger.debug("创建异步发送监听器");
+        AbstractNoticeSendListener listener = new ExceptionNoticeAsyncSendListener(noticeFrequencyStrategy,
+                exceptionNoticeStatisticsRepository, resolverProvider, noticeComponentFactory, null,
+                applicationTaskExecutor);
+        return listener;
+    }
 }
