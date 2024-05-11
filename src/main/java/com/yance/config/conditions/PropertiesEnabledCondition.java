@@ -5,6 +5,14 @@ import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
+/**
+ *
+ * @ClassName: PropertiesEnabledCondition
+ * @Description: 配置条件
+ * @author yance
+ * @date 2019年12月19日
+ *
+ */
 public abstract class PropertiesEnabledCondition extends SpringBootCondition {
 
 	protected final String propName;
