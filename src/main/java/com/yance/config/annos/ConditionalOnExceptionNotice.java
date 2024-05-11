@@ -9,7 +9,9 @@ import java.lang.annotation.*;
 /**
  * 判断已开启异常通知
  * 
- * @author 徐晓东
+ * @author yangpeng
+ * @date 2019年4月16日
+ * @version 1.0
  *
  */
 @Target({ ElementType.TYPE, ElementType.METHOD })
