@@ -11,6 +11,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * 异常通知配置
+ * @author yance
+ * @date 2020/11/05
+ * @version 1.0
+ */
 @Configuration
 @ConditionalOnExceptionNotice
 @EnableConfigurationProperties({ ExceptionNoticeProperties.class })

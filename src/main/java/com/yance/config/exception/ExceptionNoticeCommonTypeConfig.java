@@ -10,6 +10,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * 异常监听配置
+ * @author yance
+ * @date 2020/06/01
+ * @version 1.0
+ */
 @Configuration
 @ConditionalOnExceptionNotice
 @ConditionalOnProperty(name = "prometheus.exceptionnotice.listen-type", havingValue = "common", matchIfMissing = true)
