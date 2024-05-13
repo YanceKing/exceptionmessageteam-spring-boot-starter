@@ -12,17 +12,24 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+/**
+ * 告警通知自动配置
+ *
+ * @author yance
+ * @version 1.0
+ * @date 2021/12/23
+ */
 @Configuration
-@EnableConfigurationProperties({ PrometheusNoticeProperties.class })
+@EnableConfigurationProperties({PrometheusNoticeProperties.class})
 @Conditional(PrometheusEnabledCondition.class)
 public class NoticeAutoConfiguration {
 
-	@Bean
-	@ConditionalOnMissingBean
-	public NoticeComponentFactory noticeComponentFactory(List<NoticeSendComponentCustomer> customers,
-														 NoticeSendComponentRegister noticeSendComponentRegister) {
-		customers.forEach(customer -> customer.custom(noticeSendComponentRegister));
-		DefaultNoticCompoenntFactory compoenntFactory = new DefaultNoticCompoenntFactory(noticeSendComponentRegister);
-		return compoenntFactory;
-	}
+    @Bean
+    @ConditionalOnMissingBean
+    public NoticeComponentFactory noticeComponentFactory(List<NoticeSendComponentCustomer> customers,
+                                                         NoticeSendComponentRegister noticeSendComponentRegister) {
+        customers.forEach(customer -> customer.custom(noticeSendComponentRegister));
+        DefaultNoticCompoenntFactory compoenntFactory = new DefaultNoticCompoenntFactory(noticeSendComponentRegister);
+        return compoenntFactory;
+    }
 }

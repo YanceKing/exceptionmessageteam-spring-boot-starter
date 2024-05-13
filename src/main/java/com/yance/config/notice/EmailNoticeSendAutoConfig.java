@@ -16,36 +16,43 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.mail.MailSender;
 
+/**
+ * 邮件通知组件自动配置
+ *
+ * @author yance
+ * @version 1.0
+ * @date 2020年1月6日
+ */
 @Configuration
-@ConditionalOnBean({ MailSender.class, MailProperties.class })
-@AutoConfigureAfter({ MailSenderAutoConfiguration.class })
+@ConditionalOnBean({MailSender.class, MailProperties.class})
+@AutoConfigureAfter({MailSenderAutoConfiguration.class})
 @Conditional(PrometheusEnabledCondition.class)
 public class EmailNoticeSendAutoConfig implements NoticeSendComponentCustomer {
 
-	@Autowired
-	private MailSender mailSender;
+    @Autowired
+    private MailSender mailSender;
 
-	@Autowired
-	private MailProperties mailProperties;
+    @Autowired
+    private MailProperties mailProperties;
 
-	@Autowired
-	private PrometheusNoticeProperties prometheusNoticeProperties;
+    @Autowired
+    private PrometheusNoticeProperties prometheusNoticeProperties;
 
-	private static final Log logger = LogFactory.getLog(EmailNoticeSendAutoConfig.class);
+    private static final Log logger = LogFactory.getLog(EmailNoticeSendAutoConfig.class);
 
-	@Override
-	public int getOrder() {
-		return Ordered.LOWEST_PRECEDENCE;
-	}
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
+    }
 
-	@Override
-	public void custom(NoticeSendComponentRegister register) {
-		logger.debug("邮件通知组件注册");
-		if (prometheusNoticeProperties.getEmail() != null)
-			prometheusNoticeProperties.getEmail().forEach((x, y) -> {
-				INoticeSendComponent component = new EmailNoticeSendComponent(mailSender, mailProperties, y);
-				register.add(x, component);
-			});
-	}
+    @Override
+    public void custom(NoticeSendComponentRegister register) {
+        logger.debug("邮件通知组件注册");
+        if (prometheusNoticeProperties.getEmail() != null)
+            prometheusNoticeProperties.getEmail().forEach((x, y) -> {
+                INoticeSendComponent component = new EmailNoticeSendComponent(mailSender, mailProperties, y);
+                register.add(x, component);
+            });
+    }
 
 }
